@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排队工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .item-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .person-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .person {
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .person:first-child {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .person:first-child:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .person:first-child::before {
+            content: '👆 点击排到队尾';
+            display: block;
+            font-size: 0.75rem;
+            margin-bottom: 3px;
+            opacity: 0.9;
+        }
+
+        .person:nth-child(2) {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .person:nth-child(3) {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .person:nth-child(4) {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .person:nth-child(5) {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .person:not(:first-child):hover {
+            background: #e9ecef;
+        }
+
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .instructions h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .instructions p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            margin-top: 10px;
+            color: #666;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 排队工具</h1>
+
+        <div class="instructions">
+            <h2>📖 使用说明</h2>
+            <p>点击每个道具卡片中<strong>第一个人</strong>（带 👆 标记），该人会自动排到队尾，其余人前移一位。</p>
+            <ul>
+                <li>五个道具的排序互不影响</li>
+                <li>可以随时点击重置按钮恢复初始顺序</li>
+            </ul>
+        </div>
+
+        <div id="app"></div>
+    </div>
+
+    <script>
+        const items = [
+            {
+                name: '匣子',
+                people: ['翎翎', '魂玄', '苏苏', '暗仔', '小寄']
+            },
+            {
+                name: '绿铁',
+                people: ['魂玄', '苏苏', '暗仔', '小寄', '翎翎']
+            },
+            {
+                name: '寒铁',
+                people: ['苏苏', '暗仔', '小寄', '翎翎', '魂玄']
+            },
+            {
+                name: '玄铁',
+                people: ['暗仔', '小寄', '翎翎', '魂玄', '苏苏']
+            },
+            {
+                name: '树枝',
+                people: ['小寄', '翎翎', '魂玄', '苏苏', '暗仔']
+            }
+        ];
+
+        function rotateFirstToLast(arr) {
+            if (arr.length > 1) {
+                const first = arr.shift();
+                arr.push(first);
+            }
+            return arr;
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+
+            items.forEach((item, itemIndex) => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+
+                const header = document.createElement('div');
+                header.className = 'item-header';
+                header.innerHTML = `
+                    <span class="item-name">📦 ${item.name}</span>
+                    <button class="reset-btn" onclick="resetItem(${itemIndex})">🔄 重置</button>
+                `;
+
+                const personList = document.createElement('div');
+                personList.className = 'person-list';
+
+                item.people.forEach((person, personIndex) => {
+                    const personEl = document.createElement('div');
+                    personEl.className = 'person';
+                    personEl.textContent = person;
+                    
+                    if (personIndex === 0) {
+                        personEl.onclick = () => movePersonToLast(itemIndex);
+                    }
+                    
+                    personList.appendChild(personEl);
+                });
+
+                card.appendChild(header);
+                card.appendChild(personList);
+                app.appendChild(card);
+            });
+        }
+
+        function movePersonToLast(itemIndex) {
+            rotateFirstToLast(items[itemIndex].people);
+            render();
+        }
+
+        function resetItem(itemIndex) {
+            const initialOrders = [
+                ['翎翎', '魂玄', '苏苏', '暗仔', '小寄'],
+                ['魂玄', '苏苏', '暗仔', '小寄', '翎翎'],
+                ['苏苏', '暗仔', '小寄', '翎翎', '魂玄'],
+                ['暗仔', '小寄', '翎翎', '魂玄', '苏苏'],
+                ['小寄', '翎翎', '魂玄', '苏苏', '暗仔']
+            ];
+            items[itemIndex].people = [...initialOrders[itemIndex]];
+            render();
+        }
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
