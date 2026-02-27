@@ -52,6 +52,15 @@
             font-size: 1.3rem;
             font-weight: bold;
             color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
         }
 
         .person-list {
@@ -179,22 +188,27 @@
         const items = [
             {
                 name: '匣子',
+                icon: '匣子.jpg',
                 people: ['翎翎', '魂玄', '苏苏', '暗仔', '小寄']
             },
             {
                 name: '绿铁',
+                icon: '绿铁.jpg',
                 people: ['魂玄', '苏苏', '暗仔', '小寄', '翎翎']
             },
             {
                 name: '寒铁',
+                icon: '寒铁.jpg',
                 people: ['苏苏', '暗仔', '小寄', '翎翎', '魂玄']
             },
             {
                 name: '玄铁',
+                icon: '玄铁.jpg',
                 people: ['暗仔', '小寄', '翎翎', '魂玄', '苏苏']
             },
             {
                 name: '树枝',
+                icon: '树枝.jpg',
                 people: ['小寄', '翎翎', '魂玄', '苏苏', '暗仔']
             }
         ];
@@ -218,7 +232,10 @@
                 const header = document.createElement('div');
                 header.className = 'item-header';
                 header.innerHTML = `
-                    <span class="item-name">📦 ${item.name}</span>
+                    <span class="item-name">
+                        <img src="${item.icon}" alt="${item.name}" class="item-icon" onerror="this.style.display='none'">
+                        ${item.name}
+                    </span>
                     <button class="reset-btn" onclick="resetItem(${itemIndex})">🔄 重置</button>
                 `;
 
